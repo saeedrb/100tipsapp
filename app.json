@@ -17,7 +17,8 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "war.tips"
+      "package": "war.tips",
+      "permissions": []
     },
     "web": {
       "bundler": "metro",
