@@ -1,6 +1,7 @@
 import CButton from "@/components/commons/CButton/CButton";
 import CInput from "@/components/commons/CInput/CInput";
 import { supabase } from "@/lib/supabase";
+import { useRouter } from "expo-router";
 import { useFormik } from "formik";
 import { useState } from "react";
 import {
@@ -14,6 +15,7 @@ import {
 import * as Yup from "yup";
 import PrivacyPolicy from "../PrivacyPolicy/PrivacyPolicy";
 
+// Validation Schema با Yup
 const validationSchema = Yup.object().shape({
   name: Yup.string().required("نام و نام خانوادگی الزامی است"),
   email: Yup.string()
@@ -23,37 +25,63 @@ const validationSchema = Yup.object().shape({
       "باید یا ایمیل معتبر یا شماره تلفن معتبر وارد کنید",
       (value) => {
         if (!value) return false;
-
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         const phoneRegex = /^(\+98|0)?9\d{9}$/;
-
         return emailRegex.test(value) || phoneRegex.test(value);
       }
     ),
 });
 
-const handleSubmit = async (values: { name: string; email: string }) => {
-  try {
-    const { data, error } = await supabase
-      .from("users")
-      .insert([{ name: values.name, contactInfo: values.email }]);
-
-    if (error) throw error;
-
-    alert("اطلاعات ثبت شد!");
-  } catch (err: any) {
-    alert("خطا در ثبت اطلاعات: " + err.message);
-  }
-};
-
 const UserInfo = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
+  const router = useRouter();
 
+  // تابع ثبت اطلاعات با Supabase
+  const submitUserData = async (values: { name: string; email: string }) => {
+    try {
+      // بررسی کاربر تکراری
+      const { data: existingUser, error: checkError } = await supabase
+        .from("users")
+        .select("*")
+        .eq("contactInfo", values.email)
+        .maybeSingle();
+
+      if (checkError) {
+        console.log("خطا در بررسی داده‌ها:", checkError);
+        alert("خطا در بررسی داده‌ها");
+        return false;
+      }
+
+      if (existingUser) {
+        alert("این کاربر قبلاً ثبت شده است");
+        return true; // برای ریدایرکت
+      }
+
+      // درج اطلاعات جدید
+      const { error: insertError } = await supabase
+        .from("users")
+        .insert([{ name: values.name, contactInfo: values.email }]);
+
+      if (insertError) throw insertError;
+
+      alert("اطلاعات ثبت شد!");
+      return true;
+    } catch (err: any) {
+      console.log("خطا در ثبت اطلاعات:", err);
+      alert("خطا در ثبت اطلاعات: " + err.message);
+      return false;
+    }
+  };
+
+  // Formik
   const formik = useFormik({
     initialValues: { name: "", email: "" },
     validationSchema,
-    onSubmit: (values) => {
-      handleSubmit(values);
+    onSubmit: async (values) => {
+      const shouldRedirect = await submitUserData(values);
+      if (shouldRedirect) {
+        router.replace("/list"); // فقط بعد از موفقیت یا تکراری بودن
+      }
     },
   });
 
@@ -64,8 +92,8 @@ const UserInfo = () => {
         resizeMode="cover"
         style={styles.background}
       >
-        <Text style={styles.title}>خوش اومدین</Text>
-        <Text style={styles.subtitle}>لطفا اطلاعات خودتونو وارد کنید.</Text>
+        <Text style={styles.title}>خوش آمدید</Text>
+        <Text style={styles.subtitle}>لطفا اطلاعات خود را وارد کنید.</Text>
 
         <View style={styles.formContainer}>
           <CInput
@@ -89,7 +117,7 @@ const UserInfo = () => {
           )}
 
           <TouchableOpacity onPress={() => setShowModal(true)}>
-            <Text style={styles.link}>سیاست های حریم خصوصی را می پذیرم.</Text>
+            <Text style={styles.link}>سیاست‌های حریم خصوصی را می‌پذیرم.</Text>
           </TouchableOpacity>
 
           <CButton title="ثبت اطلاعات" onPress={formik.handleSubmit} />
