@@ -1,9 +1,10 @@
 import CButton from "@/components/commons/CButton/CButton";
 import CInput from "@/components/commons/CInput/CInput";
 import { supabase } from "@/lib/supabase";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { useFormik } from "formik";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ImageBackground,
   Modal,
@@ -35,9 +36,20 @@ const validationSchema = Yup.object().shape({
 const UserInfo = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const router = useRouter();
-
+  const checkUserInfo = async () => {
+    const name = await AsyncStorage.getItem("name");
+    const email = await AsyncStorage.getItem("email");
+    if (name && email) {
+      router.replace("/list");
+    }
+  };
+  useEffect(() => {
+    checkUserInfo();
+  }, []);
   // تابع ثبت اطلاعات با Supabase
   const submitUserData = async (values: { name: string; email: string }) => {
+    await AsyncStorage.setItem("name", values.name);
+    await AsyncStorage.setItem("email", values.email);
     try {
       // بررسی کاربر تکراری
       const { data: existingUser, error: checkError } = await supabase
