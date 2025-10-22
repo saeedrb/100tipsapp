@@ -2,7 +2,7 @@
   "expo": {
     "name": "rahkar",
     "slug": "100tipsapp",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "100tipsapp",
@@ -18,7 +18,12 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "war.tips",
-      "permissions": []
+      "permissions": [],
+      "versionCode": 2,
+      "versionName": "2.0.0"
+    },
+        "cli": {
+      "appVersionSource": "app.json"
     },
     "web": {
       "bundler": "metro",
