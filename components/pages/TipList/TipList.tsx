@@ -90,6 +90,7 @@ const getColorStyle = (colorClass: string) => {
 const styles = StyleSheet.create({
   container: {
     padding: 12,
+    fontFamily: "dana"
   },
   background: { flex: 1},
   categoryCard: {
@@ -115,7 +116,7 @@ const styles = StyleSheet.create({
   title: {
     flex: 1,
     fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: "dana"
   },
   arrow: {
     fontSize: 16,
@@ -129,6 +130,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#333",
     lineHeight: 22,
+    fontFamily: "dana"
   },
 });
 
